@@ -69,6 +69,22 @@ module Action =
         let x,y = robotState.Position
         printfn "REPORT: X Position: %d Y Position: %d Orientation %A" x y robotState.Orientation
 
+module Parser =
+    open FParsec
+
+    type UserState = unit // doesn't have to be unit, of course
+    type Parser<'t> = Parser<'t, UserState>
+
+    type Command = | Left | Right | Place | Turn | Report
+
+    let commands = [ Left; Right; Place; Turn; Report ]
+
+    let pCommand : Parser<_> =
+        commands
+        |> List.map (fun command -> command |> string |> pstringCI >>% command)
+        |> List.reduce (<|>)
+
+
 [<EntryPoint>]
 let main argv =
     // TODO: Drive the Robot
