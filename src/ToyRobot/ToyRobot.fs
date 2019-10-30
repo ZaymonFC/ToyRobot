@@ -1,14 +1,8 @@
 ﻿module ToyRobot
 
-type TurningDirection =
-    | Left
-    | Right
+type TurningDirection = | Left | Right
 
-type Direction =
-    | North
-    | East
-    | South
-    | West
+type Direction = | North | East | South | West
 module Direction =
     let turn : Direction * TurningDirection -> Direction = function
         | North, Right | South, Left  -> East
@@ -73,10 +67,7 @@ module Action =
 
     let report: Report = fun robotState ->
         let x,y = robotState.Position
-        printfn "REPORT: X Position: %d Y Position: %d Orientation %A"
-            x
-            y
-            robotState.Orientation
+        printfn "REPORT: X Position: %d Y Position: %d Orientation %A" x y robotState.Orientation
 
 [<EntryPoint>]
 let main argv =
