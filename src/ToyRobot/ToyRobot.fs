@@ -75,12 +75,16 @@ module Parser =
     type UserState = unit // doesn't have to be unit, of course
     type Parser<'t> = Parser<'t, UserState>
 
-    type Command = | Left | Right | Place | Turn | Report
+    type Command =
+        | Place of int * int * Direction
+        | Move
+        | Left
+        | Right
+        | Report
 
-    let commands = [ Left; Right; Place; Turn; Report ]
-
-    let pCommand : Parser<_> =
-        commands
+    let valueLessCommands = [ Move; Left; Right; Report ]
+    let pvalueLessCommands : Parser<_> =
+        valueLessCommands
         |> List.map (fun command -> command |> string |> pstringCI >>% command)
         |> List.reduce (<|>)
 
