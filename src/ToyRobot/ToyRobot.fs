@@ -102,8 +102,7 @@ module Parser =
     let getCommand = run pcommand
 
 
-[<EntryPoint>]
-let main _ =
+module REPL =
     let commandHandler robotStates robot command =
         match command with
         | Place (position, direction) -> (Action.place robot position direction) :: robotStates
@@ -124,9 +123,13 @@ let main _ =
             | Failure (f, _, _) -> printfn "%A" f; recurser robotStates
             | Success (command, _, _) -> recurser <| commandHandler robotStates robot command
 
+
+[<EntryPoint>]
+let main _ =
+
     printfn "Hello Welcome to the ToyRobot. Please enter commands:"
 
-    recurser [RobotState.zero ()]
+    REPL.recurser [RobotState.zero ()]
 
     printfn "Goodbye :>"
     0
