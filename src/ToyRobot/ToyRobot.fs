@@ -31,6 +31,12 @@ type RobotState =
         Position: Position
         Orientation: Direction
     }
+module RobotState =
+    let zero : unit -> RobotState = fun () -> {
+        Constraint = { Height = 5; Width = 5 }
+        Position = 0, 0;
+        Orientation = North
+    }
 
 module Helpers =
     let (|WithinBound|_|) b x = if x >= 0 && x < b then Some () else None
