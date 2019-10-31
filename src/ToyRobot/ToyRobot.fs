@@ -1,6 +1,7 @@
 ﻿module ToyRobot
 
 open System
+open FParsec
 
 type TurningDirection = | Left | Right
 
@@ -66,7 +67,7 @@ module Action =
         robotState.Position
         |> Position.MoveInDirection robotState.Orientation 1
         |> Helpers.boundsCheck robotState.Constraint
-        |> function | None -> printf "Robot is at the edge."; robotState
+        |> function | None -> printfn "Robot is at the edge."; robotState
                     | Some newPosition -> { robotState with Position = newPosition }
 
     let turn: Turn = fun robotState turningDirection ->
@@ -74,41 +75,58 @@ module Action =
 
     let report: Report = fun robotState ->
         let x,y = robotState.Position
-        printfn "REPORT: X Position: %d Y Position: %d Orientation %A" x y robotState.Orientation
+        printfn "Robot: X: %d Y: %d Orientation %A" x y robotState.Orientation
 
+[<AutoOpen>]
 module Parser =
-    open FParsec
-
     type Command =
         | Place of (int * int) * Direction
         | Move
         | Left
         | Right
         | Report
+        | Quit
 
     let pvalueLessCommands =
-        [ Move; Left; Right; Report ]
+        [ Move; Left; Right; Report; Quit ]
         |> List.map (fun command -> command |> string |> pstringCI >>% command) |> List.reduce (<|>)
 
     let pdirections =
         [ North; South; East; West ] |> List.map (fun d -> d |> string |> pstringCI >>% d) |> List.reduce (<|>)
 
     let pcoordinates = pint32 .>> spaces .>> pchar ',' .>> spaces .>>. pint32
-    let pplace = "PLACE" |> pstringCI .>> spaces >>. pcoordinates .>> spaces .>>. pdirections |>> Place
-
-    let result = run pplace "PLACE 2, 3 NORTH"
-    printf "%A" result
+    let pplace = "Place" |> pstringCI .>> spaces >>. pcoordinates .>> spaces .>>. pdirections |>> Place
 
     let pcommand = choice [pplace; pvalueLessCommands]
 
     let getCommand = run pcommand
 
+
 [<EntryPoint>]
-let main argv =
-    printfn "Hello Welcome to the ToyRobot!"
+let main _ =
+    let commandHandler robotStates robot command =
+        match command with
+        | Place (position, direction) -> (Action.place robot position direction) :: robotStates
+        | Move -> (Action.move robot) :: robotStates
+        | Left -> (Action.turn robot TurningDirection.Left) :: robotStates
+        | Right -> (Action.turn robot TurningDirection.Right) :: robotStates
+        | Report -> Action.report robot; robotStates
+        | Quit -> []
 
-    while true do
-        let input = Console.ReadLine()
-        printfn "\n%A" (Parser.getCommand input)
+    let rec recurser robotStates =
+        match robotStates with
+        | [] -> ()
+        | robot::_ ->
+            printf "> "
+            let parseResult = getCommand (Console.ReadLine())
 
-    0 // return an integer exit code
+            match parseResult with
+            | Failure (f, _, _) -> printfn "%A" f; recurser robotStates
+            | Success (command, _, _) -> recurser <| commandHandler robotStates robot command
+
+    printfn "Hello Welcome to the ToyRobot. Please enter commands:"
+
+    recurser [RobotState.zero ()]
+
+    printfn "Goodbye :>"
+    0
