@@ -7,6 +7,9 @@
 
   <ItemGroup>
     <Compile Include="ToyRobot.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FParsec" Version="1.0.3" />
   </ItemGroup>
 
