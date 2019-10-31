@@ -1,5 +1,7 @@
 ﻿module ToyRobot
 
+open System
+
 type TurningDirection = | Left | Right
 
 type Direction = | North | East | South | West
@@ -11,7 +13,6 @@ module Direction =
         | East,  Left  | West,  Right -> North
 
 type Distance = int
-
 type Position = int * int
 module Position =
     let MoveInDirection : Direction -> Distance -> Position -> Position =
@@ -46,7 +47,7 @@ module Action =
     type Report = RobotState -> unit
 
     let place : Place = fun robotState position direction ->
-        // Check State Invariant - Can't place outside bounds
+        // Invariant: Can't place robot out of bounds
         match Helpers.boundsCheck robotState.Constraint position with
         | Some newPosition ->
             { robotState with
@@ -72,25 +73,36 @@ module Action =
 module Parser =
     open FParsec
 
-    type UserState = unit // doesn't have to be unit, of course
-    type Parser<'t> = Parser<'t, UserState>
-
     type Command =
-        | Place of int * int * Direction
+        | Place of (int * int) * Direction
         | Move
         | Left
         | Right
         | Report
 
-    let valueLessCommands = [ Move; Left; Right; Report ]
-    let pvalueLessCommands : Parser<_> =
-        valueLessCommands
-        |> List.map (fun command -> command |> string |> pstringCI >>% command)
-        |> List.reduce (<|>)
+    let pvalueLessCommands =
+        [ Move; Left; Right; Report ]
+        |> List.map (fun command -> command |> string |> pstringCI >>% command) |> List.reduce (<|>)
 
+    let pdirections =
+        [ North; South; East; West ] |> List.map (fun d -> d |> string |> pstringCI >>% d) |> List.reduce (<|>)
+
+    let pcoordinates = pint32 .>> spaces .>> pchar ',' .>> spaces .>>. pint32
+    let pplace = "PLACE" |> pstringCI .>> spaces >>. pcoordinates .>> spaces .>>. pdirections |>> Place
+
+    let result = run pplace "PLACE 2, 3 NORTH"
+    printf "%A" result
+
+    let pcommand = choice [pplace; pvalueLessCommands]
+
+    let getCommand = run pcommand
 
 [<EntryPoint>]
 let main argv =
-    // TODO: Drive the Robot
-    printfn "Hello World from F#!"
+    printfn "Hello Welcome to the ToyRobot!"
+
+    while true do
+        let input = Console.ReadLine()
+        printfn "\n%A" (Parser.getCommand input)
+
     0 // return an integer exit code
