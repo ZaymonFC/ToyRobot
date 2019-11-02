@@ -5,8 +5,8 @@ open Expecto.Flip
 
 open ToyRobot
 
-let invariants = testList "Properties and Invariants" [
-    testProperty "commands shouldn't result in invalid state or exception" <|
+let invariants = testList "Invariants" [
+    testProperty "commands shouldn't result in invalid state" <|
         fun (commands: Parser.Command list) ->
             let commands = commands |> List.filter (fun c -> c <> Quit)
 
@@ -17,14 +17,17 @@ let invariants = testList "Properties and Invariants" [
                 | [] -> robotStates
                 | head::_ -> REPL.commandHandler robotStates head command
 
-            let finalState = commands |> List.fold folder initialRobotState |> List.head
-            let bounds = finalState.Constraint
+            commands
+            |> List.fold folder initialRobotState
+            |> List.iter (fun robot ->
+                let bounds = robot.Constraint
 
-            let x, y = finalState.Position
+                let x, y = robot.Position
 
-            x < bounds.Width |> Expect.isTrue ""
-            x >= 0 |> Expect.isTrue ""
+                x < bounds.Width |> Expect.isTrue ""
+                x >= 0 |> Expect.isTrue ""
 
-            y < bounds.Height |> Expect.isTrue ""
-            y >= 0 |> Expect.isTrue ""
+                y < bounds.Height |> Expect.isTrue ""
+                y >= 0 |> Expect.isTrue ""
+            )
 ]
