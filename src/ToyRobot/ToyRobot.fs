@@ -13,6 +13,7 @@ module Direction =
         | East,  Right | West,  Left  -> South
         | East,  Left  | West,  Right -> North
 
+
 type Distance = int
 type Position = int * int
 module Position =
@@ -23,6 +24,7 @@ module Position =
         | East  -> x + distance, y
         | South -> x, y - distance
         | West  -> x - distance, y
+
 
 type Bounds = { Height: int; Width: int }
 
@@ -39,6 +41,7 @@ module RobotState =
         Orientation = North
     }
 
+
 module Helpers =
     let (|WithinBound|_|) b x = if x >= 0 && x < b then Some () else None
 
@@ -46,6 +49,7 @@ module Helpers =
         match position with
         | WithinBound bounds.Width, WithinBound bounds.Height -> Some position
         | _ -> None
+
 
 module Action =
     type Place  = RobotState -> Position -> Direction -> RobotState
@@ -76,6 +80,7 @@ module Action =
     let report: Report = fun robotState ->
         let x,y = robotState.Position
         printfn "Robot: X: %d Y: %d Orientation %A" x y robotState.Orientation
+
 
 [<AutoOpen>]
 module Parser =
