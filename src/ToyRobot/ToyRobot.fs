@@ -82,7 +82,6 @@ module Action =
         printfn "Robot: X: %d Y: %d Orientation %A" x y robotState.Orientation
 
 
-[<AutoOpen>]
 module Parser =
     type Command =
         | Place of (int * int) * Direction
@@ -110,19 +109,19 @@ module Parser =
 module REPL =
     let commandHandler robotStates robot command =
         match command with
-        | Place (position, direction) -> (Action.place robot position direction) :: robotStates
-        | Move -> (Action.move robot) :: robotStates
-        | Left -> (Action.turn robot TurningDirection.Left) :: robotStates
-        | Right -> (Action.turn robot TurningDirection.Right) :: robotStates
-        | Report -> Action.report robot; robotStates
-        | Quit -> []
+        | Parser.Command.Place (position, direction) -> (Action.place robot position direction) :: robotStates
+        | Parser.Command.Move -> (Action.move robot) :: robotStates
+        | Parser.Command.Left -> (Action.turn robot TurningDirection.Left) :: robotStates
+        | Parser.Command.Right -> (Action.turn robot TurningDirection.Right) :: robotStates
+        | Parser.Command.Report -> Action.report robot; robotStates
+        | Parser.Command.Quit -> []
 
     let rec recurser robotStates =
         match robotStates with
         | [] -> ()
         | robot::_ ->
             printf "> "
-            let parseResult = getCommand (Console.ReadLine())
+            let parseResult = Parser.getCommand (Console.ReadLine())
 
             match parseResult with
             | Failure (f, _, _) -> printfn "%A" f; recurser robotStates
