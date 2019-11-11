@@ -4,6 +4,7 @@ open Expecto
 [<Tests>]
 let tests =
     testList "ToyRobot" [
+        Tests.Scenarios.tests
         Tests.Helpers.helperTests
         Tests.Properties.invariants
     ]

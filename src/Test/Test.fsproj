@@ -10,6 +10,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Scenarios.fs" />
     <Compile Include="PropertyTests.fs" />
     <Compile Include="HelperTests.fs" />
     <Compile Include="Program.fs" />

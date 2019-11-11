@@ -4,6 +4,7 @@ open Expecto
 open Expecto.Flip
 
 open ToyRobot
+open ToyRobot.Parser
 
 let invariants = testList "Invariants" [
     testProperty "commands shouldn't result in invalid state" <|
