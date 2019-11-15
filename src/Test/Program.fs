@@ -8,6 +8,7 @@ let tests =
         Tests.Helpers.helperTests
         Tests.Properties.invariants
     ]
+    |> Test.shuffle
 
 [<EntryPoint>]
 let main argv =
